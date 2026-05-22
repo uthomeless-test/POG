@@ -107,6 +107,7 @@ textarea.ta{width:100%;background:var(--bg3);border:1px solid var(--border2);col
   <button class="tab-btn active" id="tab-season" onclick="switchTab('season')">シーズン成績</button>
   <button class="tab-btn" id="tab-overall" onclick="switchTab('overall')">通算ランキング</button>
   <button class="tab-btn" id="tab-horses" onclick="switchTab('horses')">馬一覧</button>
+  <button class="tab-btn" id="tab-allhorses" onclick="switchTab('allhorses')">全馬ランキング</button>
   <div class="hdr-right">
     <button class="btn btn-s" onclick="openImport()" style="font-size:12px;padding:5px 12px;">＋ データ追加</button>
   </div>
@@ -164,6 +165,8 @@ let currentTab = 'season';
 let viewingUser = null;
 let overallSortCol = 'avgRank';
 let overallSortDir = 1;
+let allHorsesSortCol = 'money';
+let allHorsesSortDir = -1;
 
 // manifest から人数を取得（未ロード時も表示用）
 const SEASON_COUNTS = {
@@ -237,13 +240,10 @@ function switchTab(tab) {
   document.getElementById('tab-season').classList.toggle('active', tab === 'season');
   document.getElementById('tab-overall').classList.toggle('active', tab === 'overall');
   document.getElementById('tab-horses').classList.toggle('active', tab === 'horses');
-  if (tab === 'overall') {
-    renderSidebar();
-    renderOverall();
-  } else {
-    renderSidebar();
-    render();
-  }
+  document.getElementById('tab-allhorses').classList.toggle('active', tab === 'allhorses');
+  if (tab === 'overall') { renderSidebar(); renderOverall(); }
+  else if (tab === 'allhorses') { renderSidebar(); renderAllHorsesRanking(); }
+  else { renderSidebar(); render(); }
 }
 
 function render() {
@@ -346,45 +346,52 @@ function renderUserHorsesInSeason() {
 async function renderOverall() {
   const el = document.getElementById('mainArea');
   el.innerHTML = '<div class="loading">全シーズン読み込み中...</div>';
-
   await loadAllSeasons();
 
-  // ロード済みシーズンのみ（manifest順）
   const loadedKeys = manifest.filter(m => seasons[m.key]).map(m => m.key);
 
-  // 全プレイヤーをcanonical名で集計
-  const players = {}; // canonical name -> { entries: [{key, rank, money}], ... }
-
+  const players = {};
   loadedKeys.forEach(key => {
     const s = seasons[key];
     const sorted = Object.values(s.users).sort((a,b) => b.money - a.money);
     sorted.forEach((u, i) => {
       const cname = canonical(u.name);
       if (!players[cname]) players[cname] = { name: cname, entries: [] };
-      players[cname].entries.push({ key, rank: i+1, money: u.money, rawName: u.name });
+      players[cname].entries.push({ key, rank: i+1, money: u.money });
     });
   });
 
-  // 平均計算
   const rows = Object.values(players).map(p => {
     const n = p.entries.length;
     const avgRank  = p.entries.reduce((s,e)=>s+e.rank,0) / n;
     const avgMoney = Math.round(p.entries.reduce((s,e)=>s+e.money,0) / n);
-    return { ...p, avgRank, avgMoney, seasons: n };
+    const r1 = p.entries.filter(e=>e.rank===1).length;
+    const r2 = p.entries.filter(e=>e.rank===2).length;
+    const r3 = p.entries.filter(e=>e.rank===3).length;
+    const r4 = p.entries.filter(e=>e.rank>=4).length;
+    return { ...p, avgRank, avgMoney, seasons: n, r1, r2, r3, r4 };
   });
 
-  // ソート
+  // ソート: 平均順位昇順、同値は参加回数降順
   rows.sort((a,b) => {
-    const av = a[overallSortCol], bv = b[overallSortCol];
-    return overallSortDir * (typeof av === 'number' ? av - bv : String(av).localeCompare(String(bv)));
+    if (overallSortCol === 'avgRank') {
+      if (a.avgRank !== b.avgRank) return a.avgRank - b.avgRank;
+      return b.seasons - a.seasons; // 同順位なら参加多い方が上
+    }
+    if (overallSortCol === 'avgMoney') return overallSortDir * (b.avgMoney - a.avgMoney);
+    if (overallSortCol === 'seasons')  return overallSortDir * (b.seasons - a.seasons);
+    if (overallSortCol === 'r1')       return overallSortDir * (b.r1 - a.r1);
+    if (overallSortCol === 'name')     return overallSortDir * a.name.localeCompare(b.name);
+    return 0;
   });
 
-  const medal = r => r===1?'🥇':r===2?'🥈':r===3?'🥉':'';
+  const medal   = r => r===1?'🥇':r===2?'🥈':r===3?'🥉':'';
   const rankCls = r => r===1?'r1':r===2?'r2':r===3?'r3':'';
 
-  const thSort = (col, label, right=false) => {
-    const dir = overallSortCol===col ? (overallSortDir===1?'asc':'desc') : '';
-    return `<th class="sortable ${dir}" style="${right?'text-align:right;':''}" onclick="setOverallSort('${col}')">${label}</th>`;
+  const thSort = (col, label, right=false, title='') => {
+    const active = overallSortCol === col;
+    const dir = active ? (overallSortDir===1?'asc':'desc') : '';
+    return `<th class="sortable ${dir}" style="${right?'text-align:right;':''}" onclick="setOverallSort('${col}')" title="${title}">${label}</th>`;
   };
 
   let h = `<div class="sec-head">
@@ -396,13 +403,21 @@ async function renderOverall() {
     ${thSort('name','ユーザー')}`;
   loadedKeys.forEach(key => {
     const sname = seasons[key].meta.name.replace('スマ勢','');
-    h += `<th style="text-align:right;font-size:10px;">${sname}</th>`;
+    h += `<th style="text-align:right;font-size:10px;white-space:nowrap;">${sname}</th>`;
   });
-  h += `${thSort('avgRank','平均順位',true)}${thSort('avgMoney','平均賞金',true)}${thSort('seasons','参加',true)}
-  </tr></thead><tbody>`;
+  h += `${thSort('avgRank','平均順位',true,'クリックでソート')}`;
+  h += `${thSort('avgMoney','平均賞金',true)}`;
+  h += `${thSort('r1','成績',true,'1位-2位-3位-4位以下')}`;
+  h += `${thSort('seasons','参加',true)}`;
+  h += `</tr></thead><tbody>`;
 
-  rows.forEach(row => {
-    h += `<tr><td style="font-weight:600;white-space:nowrap;">${row.name}</td>`;
+  rows.forEach((row, i) => {
+    h += `<tr><td style="font-weight:600;white-space:nowrap;">`;
+    // 通算順位バッジ
+    const overallRank = i + 1;
+    const om = overallRank===1?'🥇':overallRank===2?'🥈':overallRank===3?'🥉':'';
+    h += `${om?`<span style="margin-right:4px;">${om}</span>`:`<span style="font-size:11px;color:var(--text3);margin-right:6px;">${overallRank}</span>`}${row.name}</td>`;
+
     loadedKeys.forEach(key => {
       const e = row.entries.find(e=>e.key===key);
       if (e) {
@@ -411,8 +426,11 @@ async function renderOverall() {
         h += `<td class="absent">—</td>`;
       }
     });
+
     h += `<td class="avg-cell">${avgRankStr(row.avgRank)}</td>`;
     h += `<td class="avg-cell" style="color:var(--green);">${row.avgMoney.toLocaleString()}</td>`;
+    // 成績: [1位-2位-3位-4位以下]
+    h += `<td class="avg-cell"><span class="res">[${row.r1}-${row.r2}-${row.r3}-${row.r4}]</span></td>`;
     h += `<td class="avg-cell" style="color:var(--text3);">${row.seasons}</td>`;
     h += `</tr>`;
   });
@@ -422,7 +440,6 @@ async function renderOverall() {
 }
 
 function avgRankStr(r) {
-  // 小数点1桁、1位に近いほど緑
   const color = r <= 2 ? 'var(--green)' : r <= 4 ? 'var(--text)' : 'var(--text3)';
   return `<span style="color:${color};">${r.toFixed(1)}</span>`;
 }
@@ -431,6 +448,88 @@ function setOverallSort(col) {
   if (overallSortCol === col) overallSortDir *= -1;
   else { overallSortCol = col; overallSortDir = col === 'avgRank' || col === 'name' ? 1 : -1; }
   renderOverall();
+}
+
+// ===== 全馬ランキングタブ =====
+async function renderAllHorsesRanking() {
+  const el = document.getElementById('mainArea');
+  el.innerHTML = '<div class="loading">全シーズン読み込み中...</div>';
+  await loadAllSeasons();
+
+  const loadedKeys = manifest.filter(m => seasons[m.key]).map(m => m.key);
+
+  // 全馬を収集（同一馬が複数シーズンに出る可能性があるのでkettonumで重複排除）
+  const horseMap = {}; // kettonum or 馬名 -> best entry
+  loadedKeys.forEach(key => {
+    const s = seasons[key];
+    Object.values(s.users).forEach(u => {
+      (u.horses||[]).forEach(h => {
+        if (!h.name && !h.dam) return;
+        const id = h.kettonum || (h.name + '_' + (h.dam||''));
+        if (!horseMap[id] || h.money > horseMap[id].money) {
+          horseMap[id] = { ...h, ownerName: canonical(u.name), season: s.meta.name };
+        }
+      });
+    });
+  });
+
+  let horses = Object.values(horseMap);
+
+  // ソート
+  horses.sort((a,b) => {
+    if (allHorsesSortCol === 'money')   return allHorsesSortDir * (b.money - a.money);
+    if (allHorsesSortCol === 'name')    return allHorsesSortDir * (a.name||'').localeCompare(b.name||'');
+    if (allHorsesSortCol === 'owner')   return allHorsesSortDir * a.ownerName.localeCompare(b.ownerName);
+    if (allHorsesSortCol === 'season')  return allHorsesSortDir * a.season.localeCompare(b.season);
+    return 0;
+  });
+
+  const thH = (col, label, right=false) => {
+    const active = allHorsesSortCol === col;
+    const dir = active ? (allHorsesSortDir===1?'asc':'desc') : '';
+    return `<th class="sortable ${dir}" style="${right?'text-align:right;':''}" onclick="setAllHorsesSort('${col}')">${label}</th>`;
+  };
+
+  let h = `<div class="sec-head">
+    <h2>🏇 全馬ランキング</h2>
+    <span class="sec-meta">全${loadedKeys.length}シーズン / ${horses.length}頭</span>
+  </div>`;
+
+  h += `<div class="tbl-wrap"><table><thead><tr>
+    <th style="text-align:right;width:36px;"></th>
+    ${thH('name','馬名')}
+    ${thH('owner','オーナー')}
+    ${thH('season','シーズン')}
+    <th>性</th><th>成績</th>
+    ${thH('money','本賞金',true)}
+    <th>厩舎</th><th>血統</th><th></th>
+  </tr></thead><tbody>`;
+
+  horses.forEach((hr, i) => {
+    const sc = hr.sex==='牝'?'sex-f':hr.sex==='セ'?'sex-g':'sex-m';
+    const dispName = hr.name || `（母:${hr.dam||'不明'}）`;
+    h += `<tr>
+      <td style="text-align:right;color:var(--text3);font-size:11px;">${i+1}</td>
+      <td style="font-weight:500;white-space:nowrap;">${dispName}</td>
+      <td style="font-size:12px;color:var(--accent);font-weight:500;white-space:nowrap;">${hr.ownerName}</td>
+      <td style="font-size:11px;white-space:nowrap;"><span class="sbadge">${hr.season.replace('スマ勢','')}</span></td>
+      <td class="${sc}">${hr.sex||''}</td>
+      <td><span class="res">${hr.result||''}</span></td>
+      <td style="text-align:right;font-weight:700;" class="mono ${i===0?'g1':i===1?'g2':i===2?'g3':''}">${(hr.money||0).toLocaleString()}</td>
+      <td style="font-size:11px;white-space:nowrap;">${hr.stable||''} <span style="color:var(--text3);">${hr.area||''}</span></td>
+      <td class="ketto">父${hr.sire||'—'}<br>母${hr.dam||'—'}</td>
+      <td>${hr.kettonum?`<a class="nblink" href="https://db.netkeiba.com/horse/${hr.kettonum}" target="_blank">▼</a>`:''}</td>
+    </tr>`;
+  });
+
+  h += `</tbody></table></div>`;
+  el.innerHTML = h;
+}
+
+function setAllHorsesSort(col) {
+  if (allHorsesSortCol === col) allHorsesSortDir *= -1;
+  else { allHorsesSortCol = col; allHorsesSortDir = col === 'money' ? -1 : 1; }
+  renderAllHorsesRanking();
 }
 
 // ===== 馬一覧タブ =====

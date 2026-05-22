@@ -306,7 +306,7 @@ function renderUserHorsesInSeason() {
   const u = Object.values(s.users).find(u => u.name === viewingUser);
   if (!u) { viewingUser = null; renderSeason(); return; }
 
-  const horses = (u.horses||[]).filter(h=>h.name&&h.name.trim()).sort((a,b)=>b.money-a.money);
+  const horses = (u.horses||[]).filter(h=>h.name||h.dam).sort((a,b)=>b.money-a.money);
   const total = horses.reduce((n,h)=>n+(h.money||0),0);
 
   let h = `<button class="back-btn" onclick="viewingUser=null;renderSeason()">← ${s.meta.name} 一覧に戻る</button>`;
@@ -325,9 +325,10 @@ function renderUserHorsesInSeason() {
 
   horses.forEach(hr => {
     const sc = hr.sex==='牝'?'sex-f':hr.sex==='セ'?'sex-g':'sex-m';
+    const dispName = hr.name && hr.name.trim() ? hr.name : `<span style="color:var(--text3);font-style:italic;">（母:${hr.dam||'不明'}）</span>`;
     h += `<tr>
       <td style="color:var(--text3);font-size:12px;">${hr.no||''}</td>
-      <td style="font-weight:500;white-space:nowrap;">${hr.name}</td>
+      <td style="font-weight:500;white-space:nowrap;">${dispName}</td>
       <td class="${sc}">${hr.sex||''}</td>
       <td><span class="res">${hr.result||''}</span></td>
       <td style="text-align:right;" class="mono">${(hr.money||0).toLocaleString()}</td>
@@ -385,8 +386,7 @@ async function renderOverall() {
     return 0;
   });
 
-  const medal   = r => r===1?'🥇':r===2?'🥈':r===3?'🥉':'';
-  const rankCls = r => r===1?'r1':r===2?'r2':r===3?'r3':'';
+  const rankColor = r => r===1?'var(--gold)':r===2?'var(--silver)':r===3?'var(--bronze)':'var(--text2)';
 
   const thSort = (col, label, right=false, title='') => {
     const active = overallSortCol === col;
@@ -403,7 +403,7 @@ async function renderOverall() {
     ${thSort('name','ユーザー')}`;
   loadedKeys.forEach(key => {
     const sname = seasons[key].meta.name.replace('スマ勢','');
-    h += `<th style="text-align:right;font-size:10px;white-space:nowrap;">${sname}</th>`;
+    h += `<th style="text-align:center;font-size:10px;white-space:nowrap;">${sname}</th>`;
   });
   h += `${thSort('avgRank','平均順位',true,'クリックでソート')}`;
   h += `${thSort('avgMoney','平均賞金',true)}`;
@@ -412,24 +412,23 @@ async function renderOverall() {
   h += `</tr></thead><tbody>`;
 
   rows.forEach((row, i) => {
-    h += `<tr><td style="font-weight:600;white-space:nowrap;">`;
-    // 通算順位バッジ
     const overallRank = i + 1;
-    const om = overallRank===1?'🥇':overallRank===2?'🥈':overallRank===3?'🥉':'';
-    h += `${om?`<span style="margin-right:4px;">${om}</span>`:`<span style="font-size:11px;color:var(--text3);margin-right:6px;">${overallRank}</span>`}${row.name}</td>`;
+    const oc = overallRank===1?'var(--gold)':overallRank===2?'var(--silver)':overallRank===3?'var(--bronze)':'var(--text2)';
+    const fw = overallRank<=3?'800':'600';
+    h += `<tr><td style="white-space:nowrap;"><span style="font-family:'JetBrains Mono',monospace;font-weight:${fw};color:${oc};margin-right:8px;">${overallRank}</span>${row.name}</td>`;
 
     loadedKeys.forEach(key => {
       const e = row.entries.find(e=>e.key===key);
       if (e) {
-        h += `<td class="season-cell ${rankCls(e.rank)}"><span class="sr">${medal(e.rank)||e.rank+'位'}</span><span class="sm">${e.money.toLocaleString()}</span></td>`;
+        const fw2 = e.rank<=3?'800':'500';
+        h += `<td style="text-align:center;"><span style="font-family:'JetBrains Mono',monospace;font-weight:${fw2};color:${rankColor(e.rank)};">${e.rank}</span></td>`;
       } else {
-        h += `<td class="absent">—</td>`;
+        h += `<td style="text-align:center;color:var(--text3);">—</td>`;
       }
     });
 
     h += `<td class="avg-cell">${avgRankStr(row.avgRank)}</td>`;
     h += `<td class="avg-cell" style="color:var(--green);">${row.avgMoney.toLocaleString()}</td>`;
-    // 成績: [1位-2位-3位-4位以下]
     h += `<td class="avg-cell"><span class="res">[${row.r1}-${row.r2}-${row.r3}-${row.r4}]</span></td>`;
     h += `<td class="avg-cell" style="color:var(--text3);">${row.seasons}</td>`;
     h += `</tr>`;
@@ -441,7 +440,7 @@ async function renderOverall() {
 
 function avgRankStr(r) {
   const color = r <= 2 ? 'var(--green)' : r <= 4 ? 'var(--text)' : 'var(--text3)';
-  return `<span style="color:${color};">${r.toFixed(1)}</span>`;
+  return `<span style="color:${color};">${r.toFixed(2)}</span>`;
 }
 
 function setOverallSort(col) {
@@ -540,7 +539,7 @@ function renderHorses() {
   const meta = s.meta;
   const allHorses = [];
   Object.values(s.users).forEach(u => {
-    (u.horses||[]).filter(h=>h.name&&h.name.trim()).forEach(h => {
+    (u.horses||[]).filter(h=>h.name||h.dam).forEach(h => {
       allHorses.push({...h, ownerName: u.name});
     });
   });
@@ -562,9 +561,10 @@ function renderHorses() {
   allHorses.forEach((hr, i) => {
     const sc = hr.sex==='牝'?'sex-f':hr.sex==='セ'?'sex-g':'sex-m';
     const en = hr.ownerName.replace(/'/g,"\\'");
+    const dispName = hr.name && hr.name.trim() ? hr.name : `<span style="color:var(--text3);font-style:italic;">（母:${hr.dam||'不明'}）</span>`;
     h += `<tr class="cur" onclick="showUserHorsesAll('${en}')">
       <td style="color:var(--text3);font-size:11px;text-align:right;">${i+1}</td>
-      <td style="font-weight:500;white-space:nowrap;">${hr.name}</td>
+      <td style="font-weight:500;white-space:nowrap;">${dispName}</td>
       <td style="font-size:12px;color:var(--accent);font-weight:500;">${hr.ownerName}</td>
       <td class="${sc}">${hr.sex||''}</td>
       <td><span class="res">${hr.result||''}</span></td>
@@ -587,7 +587,7 @@ function renderUserHorsesAll() {
   const u = Object.values(s.users).find(u=>u.name===viewingUser);
   if (!u) { viewingUser = null; renderHorses(); return; }
 
-  const horses = (u.horses||[]).filter(h=>h.name&&h.name.trim()).sort((a,b)=>b.money-a.money);
+  const horses = (u.horses||[]).filter(h=>h.name||h.dam).sort((a,b)=>b.money-a.money);
   const total = horses.reduce((n,h)=>n+(h.money||0),0);
 
   let h = `<button class="back-btn" onclick="viewingUser=null;renderHorses()">← 全馬一覧に戻る</button>`;
@@ -606,9 +606,10 @@ function renderUserHorsesAll() {
 
   horses.forEach(hr => {
     const sc = hr.sex==='牝'?'sex-f':hr.sex==='セ'?'sex-g':'sex-m';
+    const dispName = hr.name && hr.name.trim() ? hr.name : `<span style="color:var(--text3);font-style:italic;">（母:${hr.dam||'不明'}）</span>`;
     h += `<tr>
       <td style="color:var(--text3);font-size:12px;">${hr.no||''}</td>
-      <td style="font-weight:500;white-space:nowrap;">${hr.name}</td>
+      <td style="font-weight:500;white-space:nowrap;">${dispName}</td>
       <td class="${sc}">${hr.sex||''}</td>
       <td><span class="res">${hr.result||''}</span></td>
       <td style="text-align:right;" class="mono">${(hr.money||0).toLocaleString()}</td>

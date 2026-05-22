@@ -166,13 +166,13 @@ let viewingUser = null;
 let overallSortCol = 'avgRank';
 let overallSortDir = 1;
 let allHorsesSortCol = 'money';
-let allHorsesSortDir = -1;
+let allHorsesSortDir = 1;
 
 // manifest から人数を取得（未ロード時も表示用）
 const SEASON_COUNTS = {
   'スマ勢14-15':4,'スマ勢15-16':6,'スマ勢16-17':7,'スマ勢17-18':6,
   'スマ勢18-19':5,'スマ勢19-20':6,'スマ勢20-21':6,'スマ勢21-22':8,
-  'スマ勢22-23':8,'スマ勢23-24':8,'スマ勢24-25':8,'スマ勢25-26':null,
+  'スマ勢22-23':8,'スマ勢23-24':8,'スマ勢24-25':8,'スマ勢25-26':7,
 };
 
 // ===== INIT =====
@@ -420,7 +420,7 @@ async function renderOverall() {
     loadedKeys.forEach(key => {
       const e = row.entries.find(e=>e.key===key);
       if (e) {
-        const fw2 = e.rank<=3?'800':'500';
+        const fw2 = e.rank<=3?'700':'400';
         h += `<td style="text-align:center;"><span style="font-family:'JetBrains Mono',monospace;font-weight:${fw2};color:${rankColor(e.rank)};">${e.rank}</span></td>`;
       } else {
         h += `<td style="text-align:center;color:var(--text3);">—</td>`;
@@ -527,7 +527,7 @@ async function renderAllHorsesRanking() {
 
 function setAllHorsesSort(col) {
   if (allHorsesSortCol === col) allHorsesSortDir *= -1;
-  else { allHorsesSortCol = col; allHorsesSortDir = col === 'money' ? -1 : 1; }
+  else { allHorsesSortCol = col; allHorsesSortDir = 1; }
   renderAllHorsesRanking();
 }
 

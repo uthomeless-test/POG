@@ -1,0 +1,130 @@
+{
+  "meta": {
+    "name": "スマ勢24-25",
+    "year": "2024/05/26〜2025/06/01",
+    "groupNum": "0526223255",
+    "generation": "2022年生まれ"
+  },
+  "users": {
+    "354805": {
+      "name": "ファミブラヴ", "money": 90111,
+      "horses": [
+        {"no":3,"name":"クロワデュノール","kettonum":"2022105102","sex":"牡","result":"[7-1-0-2]","money":49520,"syutoku":55200,"stable":"斉藤崇史","area":"栗東","sire":"キタサンブラック","dam":"ライジングクロス"},
+        {"no":1,"name":"マスカレードボール","kettonum":"2022105519","sex":"牡","result":"[4-3-1-1]","money":23520,"syutoku":40590,"stable":"手塚貴久","area":"美浦","sire":"ドゥラメンテ","dam":"マスクオフ"},
+        {"no":2,"name":"ショウナンザナドゥ","kettonum":"2022105071","sex":"牝","result":"[2-1-1-9]","money":7750,"syutoku":3000,"stable":"松下武士","area":"栗東","sire":"キズナ","dam":"ミスエーニョ"},
+        {"no":10,"name":"ヴァルキリーバース","kettonum":"2022104764","sex":"牝","result":"[3-1-0-1]","money":3870,"syutoku":3350,"stable":"田中博康","area":"美浦","sire":"エピファネイア","dam":"グロリーアーナ"},
+        {"no":7,"name":"シルバーレイン","kettonum":"2022104942","sex":"牡","result":"[2-0-2-7]","money":2120,"syutoku":900,"stable":"大竹正博","area":"美浦","sire":"エピファネイア","dam":"ノームコア"},
+        {"no":4,"name":"ウィンターベル","kettonum":"2022104939","sex":"牡","result":"[2-0-1-4]","money":1097,"syutoku":900,"stable":"木村哲也","area":"美浦","sire":"バゴ","dam":"ノチェブランカ"},
+        {"no":8,"name":"インターポーザー","kettonum":"2022104649","sex":"牡","result":"[1-0-2-6]","money":1010,"syutoku":400,"stable":"高野友和","area":"栗東","sire":"エピファネイア","dam":"インヘリットデール"},
+        {"no":6,"name":"ラヴァブル","kettonum":"2022104687","sex":"牝","result":"[2-1-1-8]","money":1000,"syutoku":900,"stable":"松下武士","area":"栗東","sire":"ジャスタウェイ","dam":"エピックラヴ"},
+        {"no":9,"name":"グラフレナート","kettonum":"2022104671","sex":"牡","result":"[0-0-1-3]","money":224,"syutoku":0,"stable":"宮田敬介","area":"美浦","sire":"キズナ","dam":"ヴィルデローゼ"},
+        {"no":5,"name":"チルウィズミー","kettonum":"2022104809","sex":"牝","result":"[0-0-0-3]","money":0,"syutoku":0,"stable":"中内田充","area":"栗東","sire":"ドゥラメンテ","dam":"シャルマント"}
+      ]
+    },
+    "354807": {
+      "name": "とうめい", "money": 25185,
+      "horses": [
+        {"no":8,"name":"マジックサンズ","kettonum":"2022104772","sex":"牡","result":"[2-1-0-7]","money":9020,"syutoku":4600,"stable":"須貝尚介","area":"栗東","sire":"キズナ","dam":"コナブリュワーズ"},
+        {"no":1,"name":"エリキング","kettonum":"2022105099","sex":"牡","result":"[4-2-0-2]","money":8620,"syutoku":10550,"stable":"中内田充","area":"栗東","sire":"キズナ","dam":"ヤングスター"},
+        {"no":7,"name":"ミッキーマドンナ","kettonum":"2022105078","sex":"牝","result":"[1-2-2-4]","money":2260,"syutoku":400,"stable":"堀宣行","area":"美浦","sire":"エピファネイア","dam":"ミッキークイーン"},
+        {"no":3,"name":"パーティハーン","kettonum":"2022105310","sex":"牡","result":"[1-1-0-2]","money":1250,"syutoku":400,"stable":"友道康夫","area":"栗東","sire":"Wootton Bassett","dam":"グリーンバナナズ"},
+        {"no":5,"name":"サリーチェ","kettonum":"2022104794","sex":"牝","result":"[1-2-0-9]","money":1193,"syutoku":400,"stable":"池添学","area":"栗東","sire":"ドゥラメンテ","dam":"サロミナ"},
+        {"no":2,"name":"マディソンガール","kettonum":"2022105098","sex":"牝","result":"[1-2-0-3]","money":890,"syutoku":400,"stable":"中内田充","area":"栗東","sire":"キズナ","dam":"ヤンキーローズ"},
+        {"no":10,"name":"ラストレガシー","kettonum":"2022105556","sex":"牡","result":"[2-4-1-7]","money":800,"syutoku":900,"stable":"手塚貴久","area":"美浦","sire":"ドゥラメンテ","dam":"リトルモンスター"},
+        {"no":6,"name":"レイニング","kettonum":"2022104750","sex":"牡","result":"[3-1-0-3]","money":720,"syutoku":1500,"stable":"森一誠","area":"美浦","sire":"サートゥルナーリア","dam":"クルミナル"},
+        {"no":4,"name":"マックスキュー","kettonum":"2022104639","sex":"牡","result":"[1-3-1-3]","money":432,"syutoku":400,"stable":"鹿戸雄一","area":"美浦","sire":"サートゥルナーリア","dam":"イストワールファム"},
+        {"no":9,"name":"パイオニアスクエア","kettonum":"2022105367","sex":"牡","result":"[0-2-2-3]","money":0,"syutoku":0,"stable":"茶木太樹","area":"栗東","sire":"ドゥラメンテ","dam":"ジュリエットシアトル"}
+      ]
+    },
+    "354808": {
+      "name": "なま", "money": 17896,
+      "horses": [
+        {"no":2,"name":"ファイアンクランツ","kettonum":"2022104720","sex":"牡","result":"[1-3-2-3]","money":5210,"syutoku":2350,"stable":"堀宣行","area":"美浦","sire":"ドゥラメンテ","dam":"カラフルブラッサム"},
+        {"no":9,"name":"ヴーレヴー","kettonum":"2022104617","sex":"牝","result":"[3-1-0-8]","money":4870,"syutoku":2100,"stable":"武幸四郎","area":"栗東","sire":"サトノクラウン","dam":"アルギュロス"},
+        {"no":4,"name":"サトノカルナバル","kettonum":"2022105128","sex":"牡","result":"[2-0-0-7]","money":4230,"syutoku":2000,"stable":"堀宣行","area":"美浦","sire":"キタサンブラック","dam":"リアリサトリス"},
+        {"no":5,"name":"アスクセクシーモア","kettonum":"2022105202","sex":"牡","result":"[4-0-2-4]","money":1360,"syutoku":2400,"stable":"福永祐一","area":"栗東","sire":"キタサンブラック","dam":"アイムオールレディセクシー"},
+        {"no":1,"name":"アロンズロッド","kettonum":"2022104635","sex":"牡","result":"[2-3-2-1]","money":1030,"syutoku":900,"stable":"宮田敬介","area":"美浦","sire":"エピファネイア","dam":"アーモンドアイ"},
+        {"no":7,"name":"リバーバレイト","kettonum":"2022105144","sex":"牡","result":"[3-1-0-1]","money":810,"syutoku":1500,"stable":"堀宣行","area":"美浦","sire":"キタサンブラック","dam":"リリーバレロ"},
+        {"no":8,"name":"カルミアクラウン","kettonum":"2022107317","sex":"牝","result":"[1-3-1-9]","money":386,"syutoku":400,"stable":"吉岡辰弥","area":"栗東","sire":"サトノクラウン","dam":"ライラプス"},
+        {"no":3,"name":"スティレセイル","kettonum":"2022104777","sex":"牝","result":"[0-0-0-5]","money":0,"syutoku":0,"stable":"福永祐一","area":"栗東","sire":"キズナ","dam":"コーステッド"},
+        {"no":6,"name":"インザスカイ","kettonum":"2022104889","sex":"牡","result":"[0-0-0-4]","money":0,"syutoku":0,"stable":"佐藤悠太","area":"栗東","sire":"キタサンブラック","dam":"ダイヤモンドディーバ"},
+        {"no":10,"name":"アスククラウンモア","kettonum":"2022105352","sex":"牡","result":"[0-0-0-3]","money":0,"syutoku":0,"stable":"田中克典","area":"栗東","sire":"サトノクラウン","dam":"シャリオドール"}
+      ]
+    },
+    "354804": {
+      "name": "ﾀﾞｲﾜふにゃ～ﾚｯﾄ", "money": 10357,
+      "horses": [
+        {"no":10,"name":"ナグルファル","kettonum":"2022105552","sex":"牡","result":"[2-0-0-6]","money":1790,"syutoku":900,"stable":"田村康仁","area":"美浦","sire":"エピファネイア","dam":"ランドオーバーシー"},
+        {"no":4,"name":"バズアップビート","kettonum":"2022104973","sex":"セ","result":"[1-2-1-8]","money":1654,"syutoku":400,"stable":"武幸四郎","area":"栗東","sire":"エピファネイア","dam":"ビートマッチ"},
+        {"no":5,"name":"ミリオンローズ","kettonum":"2022105067","sex":"牝","result":"[1-1-0-2]","money":1360,"syutoku":400,"stable":"萩原清","area":"美浦","sire":"スワーヴリチャード","dam":"マンビア"},
+        {"no":1,"name":"ジェゼロ","kettonum":"2022105122","sex":"牡","result":"[1-1-0-2]","money":1160,"syutoku":400,"stable":"須貝尚介","area":"栗東","sire":"サートゥルナーリア","dam":"ラルケット"},
+        {"no":9,"name":"サトノブリジャール","kettonum":"2022105037","sex":"牡","result":"[1-0-0-7]","money":1131,"syutoku":400,"stable":"友道康夫","area":"栗東","sire":"エピファネイア","dam":"ベルダム"},
+        {"no":6,"name":"エンダードラゴン","kettonum":"2022104890","sex":"牡","result":"[1-1-0-7]","money":1001,"syutoku":400,"stable":"友道康夫","area":"栗東","sire":"リアルスティール","dam":"ダストアンドダイヤモンズ"},
+        {"no":2,"name":"サラコスティ","kettonum":"2022104793","sex":"牡","result":"[1-2-0-8]","money":840,"syutoku":400,"stable":"池添学","area":"栗東","sire":"エピファネイア","dam":"サロニカ"},
+        {"no":8,"name":"スターウェーブ","kettonum":"2022104771","sex":"セ","result":"[2-0-1-6]","money":840,"syutoku":900,"stable":"武井亮","area":"美浦","sire":"Kingman","dam":"コスモポリタンクイーン"},
+        {"no":3,"name":"デアマトローナ","kettonum":"2022105044","sex":"牝","result":"[0-1-0-4]","money":291,"syutoku":0,"stable":"国枝栄","area":"美浦","sire":"キズナ","dam":"ホームカミングクイーン"},
+        {"no":7,"name":"ヴィジョンメーカー","kettonum":"2022104884","sex":"牡","result":"[1-2-1-3]","money":290,"syutoku":400,"stable":"林徹","area":"美浦","sire":"ルーラーシップ","dam":"タッチングスピーチ"}
+      ]
+    },
+    "354802": {
+      "name": "ヴィクトワールジタ", "money": 8813,
+      "horses": [
+        {"no":6,"name":"ミニトランザット","kettonum":"2022105230","sex":"牡","result":"[4-0-2-4]","money":2720,"syutoku":2400,"stable":"杉山佳明","area":"栗東","sire":"エピファネイア","dam":"イチオクノホシ"},
+        {"no":3,"name":"ディアナザール","kettonum":"2022104933","sex":"牡","result":"[4-1-1-1]","money":2470,"syutoku":2400,"stable":"斉藤崇史","area":"栗東","sire":"ロードカナロア","dam":"ドナウブルー"},
+        {"no":1,"name":"アルレッキーノ","kettonum":"2022104898","sex":"セ","result":"[1-3-0-4]","money":1170,"syutoku":400,"stable":"黒岩陽一","area":"美浦","sire":"ブリックスアンドモルタル","dam":"チェッキーノ"},
+        {"no":7,"name":"ドゥラリス","kettonum":"2022102885","sex":"牝","result":"[3-1-1-6]","money":780,"syutoku":1500,"stable":"吉岡辰弥","area":"栗東","sire":"ドゥラメンテ","dam":"クードメイトル"},
+        {"no":8,"name":"ラミアメンテ","kettonum":"2022105858","sex":"牝","result":"[1-0-0-3]","money":560,"syutoku":400,"stable":"堀宣行","area":"美浦","sire":"ドゥラメンテ","dam":"ラフォルス"},
+        {"no":9,"name":"ブルージュ","kettonum":"2022104800","sex":"牝","result":"[1-2-0-7]","money":550,"syutoku":400,"stable":"浅利英明","area":"美浦","sire":"ブリックスアンドモルタル","dam":"サンブルエミューズ"},
+        {"no":5,"name":"サンライズアレス","kettonum":"2022105967","sex":"牡","result":"[1-0-0-9]","money":255,"syutoku":400,"stable":"前川恭子","area":"栗東","sire":"ドゥラメンテ","dam":"デックドアウト"},
+        {"no":2,"name":"プリモシークエンス","kettonum":"2022105020","sex":"牡","result":"[0-0-1-0]","money":180,"syutoku":0,"stable":"木村哲也","area":"美浦","sire":"エピファネイア","dam":"プリモシーン"},
+        {"no":4,"name":"ホウオウユニバース","kettonum":"2022103529","sex":"牡","result":"[0-0-0-1]","money":72,"syutoku":0,"stable":"吉岡辰弥","area":"栗東","sire":"エピファネイア","dam":"ツーデイズノーチス"},
+        {"no":10,"name":"スピントロニクス","kettonum":"2022104658","sex":"牡","result":"[0-0-1-10]","money":56,"syutoku":0,"stable":"池江泰寿","area":"栗東","sire":"ドゥラメンテ","dam":"ウィープノーモア"}
+      ]
+    },
+    "354803": {
+      "name": "酒井宏樹", "money": 8651,
+      "horses": [
+        {"no":1,"name":"ダノンシーマ","kettonum":"2022104645","sex":"牡","result":"[5-1-3-0]","money":2280,"syutoku":3800,"stable":"中内田充","area":"栗東","sire":"キタサンブラック","dam":"インクルードベティ"},
+        {"no":6,"name":"クライスレリアーナ","kettonum":"2022104818","sex":"牝","result":"[2-4-2-0]","money":1610,"syutoku":900,"stable":"木村哲也","area":"美浦","sire":"サートゥルナーリア","dam":"シユーマ"},
+        {"no":9,"name":"キングノジョー","kettonum":"2022104959","sex":"牡","result":"[3-0-1-5]","money":1340,"syutoku":1500,"stable":"田中博康","area":"美浦","sire":"シルバーステート","dam":"パレスルーマー"},
+        {"no":2,"name":"ダノンフェアレディ","kettonum":"2022105087","sex":"牝","result":"[3-0-1-3]","money":1220,"syutoku":1500,"stable":"橋口慎介","area":"栗東","sire":"キズナ","dam":"メチャコルタ"},
+        {"no":5,"name":"ダノンセンチュリー","kettonum":"2022104814","sex":"牡","result":"[4-1-0-2]","money":620,"syutoku":2400,"stable":"大竹正博","area":"美浦","sire":"フィエールマン","dam":"シャンブルドット"},
+        {"no":3,"name":"ラトラース","kettonum":"2022105194","sex":"セ","result":"[1-1-3-5]","money":570,"syutoku":400,"stable":"中内田充","area":"栗東","sire":"キズナ","dam":"ローブティサージュ"},
+        {"no":7,"name":"ハーバードスクエア","kettonum":"2022104954","sex":"牝","result":"[0-2-1-5]","money":527,"syutoku":0,"stable":"木村哲也","area":"美浦","sire":"キズナ","dam":"パシオンルージュ"},
+        {"no":8,"name":"コジオスコ","kettonum":"2022105091","sex":"牡","result":"[0-1-1-1]","money":400,"syutoku":0,"stable":"武幸四郎","area":"栗東","sire":"エピファネイア","dam":"モシーン"},
+        {"no":10,"name":"ブラックセイバー","kettonum":"2022105699","sex":"牡","result":"[0-0-0-4]","money":84,"syutoku":0,"stable":"栗田徹","area":"美浦","sire":"キタサンブラック","dam":"サーブルクーリール"},
+        {"no":4,"name":"ソルデマジョ","kettonum":"2022105049","sex":"牡","result":"[0-0-0-3]","money":0,"syutoku":0,"stable":"国枝栄","area":"美浦","sire":"ドゥラメンテ","dam":"ポジティブマインド"}
+      ]
+    },
+    "354806": {
+      "name": "競馬勢のＳｙｍｋ", "money": 8582,
+      "horses": [
+        {"no":5,"name":"ヴィンセンシオ","kettonum":"2022104832","sex":"牡","result":"[2-1-0-4]","money":3990,"syutoku":2000,"stable":"森一誠","area":"美浦","sire":"リアルスティール","dam":"シーリア"},
+        {"no":7,"name":"ミッキージュエリー","kettonum":"2022103245","sex":"牝","result":"[3-2-0-4]","money":1360,"syutoku":1500,"stable":"中内田充","area":"栗東","sire":"エピファネイア","dam":"ミッキーチャーム"},
+        {"no":3,"name":"ソードマスター","kettonum":"2022105415","sex":"牡","result":"[1-1-1-11]","money":1150,"syutoku":400,"stable":"斎藤誠","area":"美浦","sire":"エピファネイア","dam":"デアリングエッジ"},
+        {"no":9,"name":"ヴェーヌドール","kettonum":"2022105708","sex":"牡","result":"[1-1-1-11]","money":1020,"syutoku":400,"stable":"平岩大典","area":"美浦","sire":"エピファネイア","dam":"チェルシークロイスターズ"},
+        {"no":8,"name":"ルージュミステリオ","kettonum":"2022101399","sex":"牝","result":"[1-0-0-2]","money":560,"syutoku":400,"stable":"辻野泰之","area":"栗東","sire":"ナダル","dam":"カーサデルシエロ"},
+        {"no":4,"name":"シストロン","kettonum":"2022105319","sex":"牝","result":"[0-1-1-7]","money":430,"syutoku":0,"stable":"中竹和也","area":"栗東","sire":"ドゥラメンテ","dam":"コルデトゥリーニ"},
+        {"no":6,"name":"ヴァルチャースター","kettonum":"2022104949","sex":"牡","result":"[0-0-0-5]","money":72,"syutoku":0,"stable":"池添学","area":"栗東","sire":"サートゥルナーリア","dam":"ハープスター"},
+        {"no":1,"name":"スワーヴゴダイヴァ","kettonum":"2022104829","sex":"牝","result":"[0-0-0-1]","money":0,"syutoku":0,"stable":"堀宣行","area":"美浦","sire":"エピファネイア","dam":"シーズアタイガー"},
+        {"no":2,"name":"リッスンクロース","kettonum":"2022105810","sex":"牝","result":"[0-0-0-6]","money":0,"syutoku":0,"stable":"林徹","area":"美浦","sire":"ルヴァンスレーヴ","dam":"セレナズヴォイス"},
+        {"no":10,"name":"ストンプ","kettonum":"2022104776","sex":"牝","result":"[0-1-0-5]","money":0,"syutoku":0,"stable":"清水久詞","area":"栗東","sire":"ドゥラメンテ","dam":"コンドコマンド"}
+      ]
+    },
+    "354809": {
+      "name": "エアナナーヴ", "money": 6442,
+      "horses": [
+        {"no":7,"name":"ジュタ","kettonum":"2022104813","sex":"牡","result":"[3-0-1-4]","money":3820,"syutoku":2500,"stable":"矢作芳人","area":"栗東","sire":"ドゥラメンテ","dam":"シャンパンエニワン"},
+        {"no":3,"name":"イリフィ","kettonum":"2022110077","sex":"牝","result":"[3-1-0-11]","money":1063,"syutoku":1500,"stable":"高野友和","area":"栗東","sire":"Too Darn Hot","dam":"Trethias"},
+        {"no":6,"name":"カシオペア","kettonum":"2022106203","sex":"牡","result":"[1-0-1-3]","money":700,"syutoku":400,"stable":"上原佑紀","area":"美浦","sire":"ビッグアーサー","dam":"リトルアマポーラ"},
+        {"no":4,"name":"エンジェルラダー","kettonum":"2022110064","sex":"牝","result":"[1-2-1-4]","money":236,"syutoku":400,"stable":"木村哲也","area":"美浦","sire":"Nyquist","dam":"Tiz Miz Sue"},
+        {"no":1,"name":"ロールザダイス","kettonum":"2022106626","sex":"セ","result":"[2-1-2-4]","money":180,"syutoku":900,"stable":"池江泰寿","area":"栗東","sire":"エピファネイア","dam":"エレーデ"},
+        {"no":8,"name":"ダノンアンチュラス","kettonum":"2022105687","sex":"牡","result":"[0-0-0-8]","money":166,"syutoku":0,"stable":"坂口智康","area":"栗東","sire":"エピファネイア","dam":"アンチュラス"},
+        {"no":2,"name":"ジャックオダモ","kettonum":"2022110044","sex":"牡","result":"[0-1-0-7]","money":112,"syutoku":0,"stable":"矢作芳人","area":"栗東","sire":"Wootton Bassett","dam":"Magic America"},
+        {"no":9,"name":"ゴージャスドラゴン","kettonum":"2022104991","sex":"牡","result":"[0-0-0-1]","money":110,"syutoku":0,"stable":"田中克典","area":"栗東","sire":"スワーヴリチャード","dam":"フィールパラダイス"},
+        {"no":5,"name":"メロンパンマニア","kettonum":"2022102679","sex":"牡","result":"[0-0-0-5]","money":55,"syutoku":0,"stable":"和田雄二","area":"美浦","sire":"ウインブライト","dam":"コスモミール"},
+        {"no":10,"name":"ジーティーララバイ","kettonum":"2022110071","sex":"牝","result":"[0-1-0-6]","money":0,"syutoku":0,"stable":"矢作芳人","area":"栗東","sire":"American Pharoah","dam":"Stopshoppingmaria"}
+      ]
+    }
+  }
+}

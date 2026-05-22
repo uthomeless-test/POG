@@ -38,6 +38,10 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20p
 .tbl-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:16px;}
 .tbl-wrap table{width:100%;border-collapse:collapse;}
 .tbl-wrap th{background:var(--bg3);padding:8px 12px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.07em;color:var(--text3);text-transform:uppercase;white-space:nowrap;user-select:none;}
+.tbl-wrap th.sortable{cursor:pointer;}
+.tbl-wrap th.sortable:hover{background:var(--bg4);}
+.tbl-wrap th.asc::after{content:' ↑';}
+.tbl-wrap th.desc::after{content:' ↓';}
 .tbl-wrap td{padding:8px 12px;border-top:1px solid var(--border);font-size:13px;vertical-align:middle;}
 .tbl-wrap tbody tr:hover td{background:var(--bg3);}
 .cur{cursor:pointer;}
@@ -86,25 +90,22 @@ textarea.ta{width:100%;background:var(--bg3);border:1px solid var(--border2);col
 .notify.err{border-color:#c03030;color:#c03030;}
 .loading{padding:40px;text-align:center;color:var(--text3);font-size:13px;}
 
-/* シーズン成績タブ：プレイヤーカード */
-.player-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:16px;}
-.player-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;cursor:pointer;transition:border-color .12s,box-shadow .12s;}
-.player-card:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(74,66,224,.1);}
-.pc-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-.pc-rank{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--text3);width:36px;text-align:center;}
-.pc-rank.r1{color:var(--gold);}
-.pc-rank.r2{color:var(--silver);}
-.pc-rank.r3{color:var(--bronze);}
-.pc-name{font-size:14px;font-weight:700;flex:1;}
-.pc-money{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px;color:var(--green);}
-.pc-horses{font-size:11px;color:var(--text3);margin-top:2px;}
-.pc-top{font-size:11px;color:var(--text2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* 通算ランキング: シーズン列の小さいセル */
+.season-cell{text-align:right;white-space:nowrap;min-width:80px;}
+.season-cell .sr{font-size:10px;color:var(--text3);margin-right:2px;}
+.season-cell .sm{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;}
+.season-cell.r1 .sm{color:var(--gold);}
+.season-cell.r2 .sm{color:var(--silver);}
+.season-cell.r3 .sm{color:var(--bronze);}
+.season-cell.absent{color:var(--text3);font-size:11px;text-align:right;}
+.avg-cell{text-align:right;font-family:'JetBrains Mono',monospace;font-weight:600;white-space:nowrap;}
 </style>
 </head>
 <body>
 <header>
   <div class="logo">POG★</div>
   <button class="tab-btn active" id="tab-season" onclick="switchTab('season')">シーズン成績</button>
+  <button class="tab-btn" id="tab-overall" onclick="switchTab('overall')">通算ランキング</button>
   <button class="tab-btn" id="tab-horses" onclick="switchTab('horses')">馬一覧</button>
   <div class="hdr-right">
     <button class="btn btn-s" onclick="openImport()" style="font-size:12px;padding:5px 12px;">＋ データ追加</button>
@@ -138,12 +139,38 @@ textarea.ta{width:100%;background:var(--bg3);border:1px solid var(--border2);col
 <div class="notify" id="notify"></div>
 
 <script>
+// ===== 同一人物エイリアスマップ =====
+// 別名 -> 正規名
+const ALIAS = {
+  'ふにゃ～ん':           'ﾀﾞｲﾜふにゃ～ﾚｯﾄ',
+  'フニャスカーレット':    'ﾀﾞｲﾜふにゃ～ﾚｯﾄ',
+  'フニャｽｶｰﾚｯﾄ':       'ﾀﾞｲﾜふにゃ～ﾚｯﾄ',
+  'じたく':               'ヴィクトワールジタ',
+  'ｳﾞｨｸﾄﾜｰﾙジタ':        'ヴィクトワールジタ',
+  '競馬勢のSymk':         '競馬勢のＳｙｍｋ',
+  'にわか競馬勢のSymk':   '競馬勢のＳｙｍｋ',
+  'エルコンドルスパイシー':'ｴﾙｺﾝﾄﾞﾙｽﾊﾟｲｼｰ',
+  'ｴﾙｺﾝﾄﾞﾙスパー':       'ｴﾙｺﾝﾄﾞﾙｽﾊﾟｲｼｰ',
+  'サカイアンドリュウ':   '酒井宏樹',
+  'エーシンジャッカル':   'ジャッカル',
+};
+function canonical(name) { return ALIAS[name] || name; }
+
 // ===== STATE =====
 let seasons = {};
 let manifest = [];
 let currentSeason = null;
 let currentTab = 'season';
-let viewingUser = null;  // nullなら一覧、文字列ならそのユーザーの馬
+let viewingUser = null;
+let overallSortCol = 'avgRank';
+let overallSortDir = 1;
+
+// manifest から人数を取得（未ロード時も表示用）
+const SEASON_COUNTS = {
+  'スマ勢14-15':4,'スマ勢15-16':6,'スマ勢16-17':7,'スマ勢17-18':6,
+  'スマ勢18-19':5,'スマ勢19-20':6,'スマ勢20-21':6,'スマ勢21-22':8,
+  'スマ勢22-23':8,'スマ勢23-24':8,'スマ勢24-25':8,'スマ勢25-26':null,
+};
 
 // ===== INIT =====
 async function init() {
@@ -177,17 +204,28 @@ async function loadAndSelect(key) {
   render();
 }
 
+// 通算ランキング用: 全シーズン一括ロード
+async function loadAllSeasons() {
+  const promises = manifest.map(m => {
+    if (seasons[m.key]) return Promise.resolve();
+    return fetch(m.file).then(r => r.json()).then(d => { seasons[m.key] = d; }).catch(() => {});
+  });
+  await Promise.all(promises);
+  renderSidebar();
+}
+
 // ===== SIDEBAR =====
 function renderSidebar() {
   const list = document.getElementById('seasonList');
   list.innerHTML = '';
   manifest.forEach(m => {
     const s = seasons[m.key];
-    const cnt = s ? Object.keys(s.users).length : '?';
+    const known = SEASON_COUNTS[m.key];
+    const cnt = s ? Object.keys(s.users).length : (known != null ? known : '');
     const div = document.createElement('div');
-    div.className = 'sb-item' + (currentSeason === m.key ? ' active' : '');
-    div.innerHTML = `<span>${m.name}</span><span class="sb-cnt">${cnt}人</span>`;
-    div.onclick = () => loadAndSelect(m.key);
+    div.className = 'sb-item' + (currentSeason === m.key && currentTab !== 'overall' ? ' active' : '');
+    div.innerHTML = `<span>${m.name}</span>${cnt !== '' ? `<span class="sb-cnt">${cnt}人</span>` : ''}`;
+    div.onclick = () => { switchTab('season'); loadAndSelect(m.key); };
     list.appendChild(div);
   });
 }
@@ -197,62 +235,63 @@ function switchTab(tab) {
   currentTab = tab;
   viewingUser = null;
   document.getElementById('tab-season').classList.toggle('active', tab === 'season');
+  document.getElementById('tab-overall').classList.toggle('active', tab === 'overall');
   document.getElementById('tab-horses').classList.toggle('active', tab === 'horses');
-  render();
+  if (tab === 'overall') {
+    renderSidebar();
+    renderOverall();
+  } else {
+    renderSidebar();
+    render();
+  }
 }
 
 function render() {
   if (!currentSeason || !seasons[currentSeason]) return;
   if (currentTab === 'season') renderSeason();
-  else renderHorses();
+  else if (currentTab === 'horses') renderHorses();
 }
 
 // ===== シーズン成績タブ =====
-// プレイヤー一覧カード → クリックで指名馬10頭
-
 function renderSeason() {
-  if (viewingUser) {
-    renderUserHorsesInSeason();
-  } else {
-    renderSeasonTop();
-  }
-}
-
-function renderSeasonTop() {
+  if (viewingUser) { renderUserHorsesInSeason(); return; }
   const el = document.getElementById('mainArea');
   const s = seasons[currentSeason];
   const meta = s.meta;
-
-  // 賞金順にソート
   const users = Object.values(s.users).sort((a, b) => b.money - a.money);
 
-  const medal = r => r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : r;
-  const rankCls = r => r === 1 ? 'r1' : r === 2 ? 'r2' : r === 3 ? 'r3' : '';
+  const medal = r => r===1?'🥇':r===2?'🥈':r===3?'🥉':'';
+  const cls   = r => r===1?'g1':r===2?'g2':r===3?'g3':'';
 
   let h = `<div class="sec-head">
     <h2>🏆 ${meta.name}</h2>
-    <span class="sbadge">${meta.year || ''}</span>
-    <span class="gbadge">${meta.generation || ''}</span>
+    <span class="sbadge">${meta.year||''}</span>
+    <span class="gbadge">${meta.generation||''}</span>
     <span class="sec-meta">${users.length}人参加</span>
   </div>`;
 
-  h += `<div class="player-grid">`;
+  h += `<div class="tbl-wrap"><table><thead><tr>
+    <th style="width:40px;"></th>
+    <th>ユーザー</th>
+    <th style="text-align:right;">本賞金（万）</th>
+    <th style="text-align:right;">指名頭数</th>
+    <th>最高馬</th>
+  </tr></thead><tbody>`;
+
   users.forEach((u, i) => {
     const rank = i + 1;
-    const topHorse = (u.horses || []).filter(h => h.name).sort((a, b) => b.money - a.money)[0];
-    const escapedName = u.name.replace(/'/g, "\\'");
-    h += `<div class="player-card" onclick="showUserHorsesInSeason('${escapedName}')">
-      <div class="pc-head">
-        <div class="pc-rank ${rankCls(rank)}">${rank <= 3 ? medal(rank) : rank}</div>
-        <div class="pc-name">${u.name}</div>
-        <div class="pc-money">${(u.money || 0).toLocaleString()} 万</div>
-      </div>
-      <div class="pc-horses">${(u.horses || []).filter(h => h.name).length}頭指名</div>
-      ${topHorse ? `<div class="pc-top">▲ ${topHorse.name}（${(topHorse.money || 0).toLocaleString()}万）</div>` : ''}
-    </div>`;
+    const topHorse = (u.horses||[]).filter(h=>h.name).sort((a,b)=>b.money-a.money)[0];
+    const escapedName = u.name.replace(/'/g,"\\'");
+    h += `<tr class="cur" onclick="showUserHorsesInSeason('${escapedName}')">
+      <td style="text-align:center;font-size:16px;">${medal(rank)||rank}</td>
+      <td style="font-weight:600;">${u.name}</td>
+      <td style="text-align:right;" class="mono ${cls(rank)}" style="font-weight:700;">${(u.money||0).toLocaleString()}</td>
+      <td style="text-align:right;" class="mono">${(u.horses||[]).filter(h=>h.name).length}</td>
+      <td style="font-size:12px;color:var(--text2);">${topHorse?`${topHorse.name}（${(topHorse.money||0).toLocaleString()}万）`:''}</td>
+    </tr>`;
   });
-  h += `</div>`;
 
+  h += `</tbody></table></div>`;
   el.innerHTML = h;
 }
 
@@ -265,16 +304,16 @@ function renderUserHorsesInSeason() {
   const el = document.getElementById('mainArea');
   const s = seasons[currentSeason];
   const u = Object.values(s.users).find(u => u.name === viewingUser);
-  if (!u) { viewingUser = null; renderSeasonTop(); return; }
+  if (!u) { viewingUser = null; renderSeason(); return; }
 
-  const horses = (u.horses || []).filter(h => h.name && h.name.trim()).sort((a, b) => b.money - a.money);
-  const total = horses.reduce((n, h) => n + (h.money || 0), 0);
+  const horses = (u.horses||[]).filter(h=>h.name&&h.name.trim()).sort((a,b)=>b.money-a.money);
+  const total = horses.reduce((n,h)=>n+(h.money||0),0);
 
-  let h = `<button class="back-btn" onclick="viewingUser=null;renderSeasonTop()">← ${s.meta.name} 一覧に戻る</button>`;
+  let h = `<button class="back-btn" onclick="viewingUser=null;renderSeason()">← ${s.meta.name} 一覧に戻る</button>`;
   h += `<div class="ph">
     <h3>${u.name}</h3>
     <span class="sbadge">${s.meta.name}</span>
-    <span class="gbadge">${s.meta.generation || ''}</span>
+    <span class="gbadge">${s.meta.generation||''}</span>
     <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--green);">計 ${total.toLocaleString()} 万</span>
   </div>`;
 
@@ -285,17 +324,17 @@ function renderUserHorsesInSeason() {
   </tr></thead><tbody>`;
 
   horses.forEach(hr => {
-    const sc = hr.sex === '牝' ? 'sex-f' : hr.sex === 'セ' ? 'sex-g' : 'sex-m';
+    const sc = hr.sex==='牝'?'sex-f':hr.sex==='セ'?'sex-g':'sex-m';
     h += `<tr>
-      <td style="color:var(--text3);font-size:12px;">${hr.no || ''}</td>
+      <td style="color:var(--text3);font-size:12px;">${hr.no||''}</td>
       <td style="font-weight:500;white-space:nowrap;">${hr.name}</td>
-      <td class="${sc}">${hr.sex || ''}</td>
-      <td><span class="res">${hr.result || ''}</span></td>
-      <td style="text-align:right;" class="mono">${(hr.money || 0).toLocaleString()}</td>
-      <td style="text-align:right;font-size:11px;color:var(--text2);" class="mono">${(hr.syutoku || 0).toLocaleString()}</td>
-      <td style="font-size:11px;white-space:nowrap;">${hr.stable || ''} <span style="color:var(--text3);">${hr.area || ''}</span></td>
-      <td class="ketto">父${hr.sire || '—'}<br>母${hr.dam || '—'}</td>
-      <td>${hr.kettonum ? `<a class="nblink" href="https://db.netkeiba.com/horse/${hr.kettonum}" target="_blank">▼</a>` : ''}</td>
+      <td class="${sc}">${hr.sex||''}</td>
+      <td><span class="res">${hr.result||''}</span></td>
+      <td style="text-align:right;" class="mono">${(hr.money||0).toLocaleString()}</td>
+      <td style="text-align:right;font-size:11px;color:var(--text2);" class="mono">${(hr.syutoku||0).toLocaleString()}</td>
+      <td style="font-size:11px;white-space:nowrap;">${hr.stable||''} <span style="color:var(--text3);">${hr.area||''}</span></td>
+      <td class="ketto">父${hr.sire||'—'}<br>母${hr.dam||'—'}</td>
+      <td>${hr.kettonum?`<a class="nblink" href="https://db.netkeiba.com/horse/${hr.kettonum}" target="_blank">▼</a>`:''}</td>
     </tr>`;
   });
 
@@ -303,34 +342,115 @@ function renderUserHorsesInSeason() {
   el.innerHTML = h;
 }
 
-// ===== 馬一覧タブ =====
-// currentSeason の全馬を賞金順、オーナー名クリックで絞り込み
+// ===== 通算ランキングタブ =====
+async function renderOverall() {
+  const el = document.getElementById('mainArea');
+  el.innerHTML = '<div class="loading">全シーズン読み込み中...</div>';
 
-function renderHorses() {
-  if (viewingUser) {
-    renderUserHorsesAll();
-  } else {
-    renderAllHorses();
-  }
+  await loadAllSeasons();
+
+  // ロード済みシーズンのみ（manifest順）
+  const loadedKeys = manifest.filter(m => seasons[m.key]).map(m => m.key);
+
+  // 全プレイヤーをcanonical名で集計
+  const players = {}; // canonical name -> { entries: [{key, rank, money}], ... }
+
+  loadedKeys.forEach(key => {
+    const s = seasons[key];
+    const sorted = Object.values(s.users).sort((a,b) => b.money - a.money);
+    sorted.forEach((u, i) => {
+      const cname = canonical(u.name);
+      if (!players[cname]) players[cname] = { name: cname, entries: [] };
+      players[cname].entries.push({ key, rank: i+1, money: u.money, rawName: u.name });
+    });
+  });
+
+  // 平均計算
+  const rows = Object.values(players).map(p => {
+    const n = p.entries.length;
+    const avgRank  = p.entries.reduce((s,e)=>s+e.rank,0) / n;
+    const avgMoney = Math.round(p.entries.reduce((s,e)=>s+e.money,0) / n);
+    return { ...p, avgRank, avgMoney, seasons: n };
+  });
+
+  // ソート
+  rows.sort((a,b) => {
+    const av = a[overallSortCol], bv = b[overallSortCol];
+    return overallSortDir * (typeof av === 'number' ? av - bv : String(av).localeCompare(String(bv)));
+  });
+
+  const medal = r => r===1?'🥇':r===2?'🥈':r===3?'🥉':'';
+  const rankCls = r => r===1?'r1':r===2?'r2':r===3?'r3':'';
+
+  const thSort = (col, label, right=false) => {
+    const dir = overallSortCol===col ? (overallSortDir===1?'asc':'desc') : '';
+    return `<th class="sortable ${dir}" style="${right?'text-align:right;':''}" onclick="setOverallSort('${col}')">${label}</th>`;
+  };
+
+  let h = `<div class="sec-head">
+    <h2>📊 通算ランキング</h2>
+    <span class="sec-meta">${loadedKeys.length}シーズン / ${rows.length}人</span>
+  </div>`;
+
+  h += `<div class="tbl-wrap" style="overflow-x:auto;"><table><thead><tr>
+    ${thSort('name','ユーザー')}`;
+  loadedKeys.forEach(key => {
+    const sname = seasons[key].meta.name.replace('スマ勢','');
+    h += `<th style="text-align:right;font-size:10px;">${sname}</th>`;
+  });
+  h += `${thSort('avgRank','平均順位',true)}${thSort('avgMoney','平均賞金',true)}${thSort('seasons','参加',true)}
+  </tr></thead><tbody>`;
+
+  rows.forEach(row => {
+    h += `<tr><td style="font-weight:600;white-space:nowrap;">${row.name}</td>`;
+    loadedKeys.forEach(key => {
+      const e = row.entries.find(e=>e.key===key);
+      if (e) {
+        h += `<td class="season-cell ${rankCls(e.rank)}"><span class="sr">${medal(e.rank)||e.rank+'位'}</span><span class="sm">${e.money.toLocaleString()}</span></td>`;
+      } else {
+        h += `<td class="absent">—</td>`;
+      }
+    });
+    h += `<td class="avg-cell">${avgRankStr(row.avgRank)}</td>`;
+    h += `<td class="avg-cell" style="color:var(--green);">${row.avgMoney.toLocaleString()}</td>`;
+    h += `<td class="avg-cell" style="color:var(--text3);">${row.seasons}</td>`;
+    h += `</tr>`;
+  });
+
+  h += `</tbody></table></div>`;
+  el.innerHTML = h;
 }
 
-function renderAllHorses() {
+function avgRankStr(r) {
+  // 小数点1桁、1位に近いほど緑
+  const color = r <= 2 ? 'var(--green)' : r <= 4 ? 'var(--text)' : 'var(--text3)';
+  return `<span style="color:${color};">${r.toFixed(1)}</span>`;
+}
+
+function setOverallSort(col) {
+  if (overallSortCol === col) overallSortDir *= -1;
+  else { overallSortCol = col; overallSortDir = col === 'avgRank' || col === 'name' ? 1 : -1; }
+  renderOverall();
+}
+
+// ===== 馬一覧タブ =====
+function renderHorses() {
+  if (viewingUser) { renderUserHorsesAll(); return; }
   const el = document.getElementById('mainArea');
   const s = seasons[currentSeason];
   const meta = s.meta;
-
   const allHorses = [];
   Object.values(s.users).forEach(u => {
-    (u.horses || []).filter(h => h.name && h.name.trim()).forEach(h => {
-      allHorses.push({ ...h, ownerName: u.name });
+    (u.horses||[]).filter(h=>h.name&&h.name.trim()).forEach(h => {
+      allHorses.push({...h, ownerName: u.name});
     });
   });
-  allHorses.sort((a, b) => b.money - a.money);
+  allHorses.sort((a,b)=>b.money-a.money);
 
   let h = `<div class="sec-head">
     <h2>🐎 馬一覧</h2>
     <span class="sbadge">${meta.name}</span>
-    <span class="gbadge">${meta.generation || ''}</span>
+    <span class="gbadge">${meta.generation||''}</span>
     <span class="sec-meta">${allHorses.length}頭</span>
   </div>`;
 
@@ -341,45 +461,41 @@ function renderAllHorses() {
   </tr></thead><tbody>`;
 
   allHorses.forEach((hr, i) => {
-    const sc = hr.sex === '牝' ? 'sex-f' : hr.sex === 'セ' ? 'sex-g' : 'sex-m';
-    const escapedName = hr.ownerName.replace(/'/g, "\\'");
-    h += `<tr class="cur" onclick="showUserHorsesAll('${escapedName}')">
-      <td style="color:var(--text3);font-size:11px;text-align:right;">${i + 1}</td>
+    const sc = hr.sex==='牝'?'sex-f':hr.sex==='セ'?'sex-g':'sex-m';
+    const en = hr.ownerName.replace(/'/g,"\\'");
+    h += `<tr class="cur" onclick="showUserHorsesAll('${en}')">
+      <td style="color:var(--text3);font-size:11px;text-align:right;">${i+1}</td>
       <td style="font-weight:500;white-space:nowrap;">${hr.name}</td>
       <td style="font-size:12px;color:var(--accent);font-weight:500;">${hr.ownerName}</td>
-      <td class="${sc}">${hr.sex || ''}</td>
-      <td><span class="res">${hr.result || ''}</span></td>
-      <td style="text-align:right;" class="mono">${(hr.money || 0).toLocaleString()}</td>
-      <td style="text-align:right;font-size:11px;color:var(--text2);" class="mono">${(hr.syutoku || 0).toLocaleString()}</td>
-      <td style="font-size:11px;white-space:nowrap;">${hr.stable || ''} <span style="color:var(--text3);">${hr.area || ''}</span></td>
-      <td class="ketto">父${hr.sire || '—'}<br>母${hr.dam || '—'}</td>
-      <td>${hr.kettonum ? `<a class="nblink" href="https://db.netkeiba.com/horse/${hr.kettonum}" target="_blank" onclick="event.stopPropagation()">▼</a>` : ''}</td>
+      <td class="${sc}">${hr.sex||''}</td>
+      <td><span class="res">${hr.result||''}</span></td>
+      <td style="text-align:right;" class="mono">${(hr.money||0).toLocaleString()}</td>
+      <td style="text-align:right;font-size:11px;color:var(--text2);" class="mono">${(hr.syutoku||0).toLocaleString()}</td>
+      <td style="font-size:11px;white-space:nowrap;">${hr.stable||''} <span style="color:var(--text3);">${hr.area||''}</span></td>
+      <td class="ketto">父${hr.sire||'—'}<br>母${hr.dam||'—'}</td>
+      <td>${hr.kettonum?`<a class="nblink" href="https://db.netkeiba.com/horse/${hr.kettonum}" target="_blank" onclick="event.stopPropagation()">▼</a>`:''}</td>
     </tr>`;
   });
-
   h += `</tbody></table></div>`;
   el.innerHTML = h;
 }
 
-function showUserHorsesAll(name) {
-  viewingUser = name;
-  renderUserHorsesAll();
-}
+function showUserHorsesAll(name) { viewingUser = name; renderUserHorsesAll(); }
 
 function renderUserHorsesAll() {
   const el = document.getElementById('mainArea');
   const s = seasons[currentSeason];
-  const u = Object.values(s.users).find(u => u.name === viewingUser);
-  if (!u) { viewingUser = null; renderAllHorses(); return; }
+  const u = Object.values(s.users).find(u=>u.name===viewingUser);
+  if (!u) { viewingUser = null; renderHorses(); return; }
 
-  const horses = (u.horses || []).filter(h => h.name && h.name.trim()).sort((a, b) => b.money - a.money);
-  const total = horses.reduce((n, h) => n + (h.money || 0), 0);
+  const horses = (u.horses||[]).filter(h=>h.name&&h.name.trim()).sort((a,b)=>b.money-a.money);
+  const total = horses.reduce((n,h)=>n+(h.money||0),0);
 
-  let h = `<button class="back-btn" onclick="viewingUser=null;renderAllHorses()">← 全馬一覧に戻る</button>`;
+  let h = `<button class="back-btn" onclick="viewingUser=null;renderHorses()">← 全馬一覧に戻る</button>`;
   h += `<div class="ph">
     <h3>${u.name}</h3>
     <span class="sbadge">${s.meta.name}</span>
-    <span class="gbadge">${s.meta.generation || ''}</span>
+    <span class="gbadge">${s.meta.generation||''}</span>
     <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--green);">計 ${total.toLocaleString()} 万</span>
   </div>`;
 
@@ -390,20 +506,19 @@ function renderUserHorsesAll() {
   </tr></thead><tbody>`;
 
   horses.forEach(hr => {
-    const sc = hr.sex === '牝' ? 'sex-f' : hr.sex === 'セ' ? 'sex-g' : 'sex-m';
+    const sc = hr.sex==='牝'?'sex-f':hr.sex==='セ'?'sex-g':'sex-m';
     h += `<tr>
-      <td style="color:var(--text3);font-size:12px;">${hr.no || ''}</td>
+      <td style="color:var(--text3);font-size:12px;">${hr.no||''}</td>
       <td style="font-weight:500;white-space:nowrap;">${hr.name}</td>
-      <td class="${sc}">${hr.sex || ''}</td>
-      <td><span class="res">${hr.result || ''}</span></td>
-      <td style="text-align:right;" class="mono">${(hr.money || 0).toLocaleString()}</td>
-      <td style="text-align:right;font-size:11px;color:var(--text2);" class="mono">${(hr.syutoku || 0).toLocaleString()}</td>
-      <td style="font-size:11px;white-space:nowrap;">${hr.stable || ''} <span style="color:var(--text3);">${hr.area || ''}</span></td>
-      <td class="ketto">父${hr.sire || '—'}<br>母${hr.dam || '—'}</td>
-      <td>${hr.kettonum ? `<a class="nblink" href="https://db.netkeiba.com/horse/${hr.kettonum}" target="_blank">▼</a>` : ''}</td>
+      <td class="${sc}">${hr.sex||''}</td>
+      <td><span class="res">${hr.result||''}</span></td>
+      <td style="text-align:right;" class="mono">${(hr.money||0).toLocaleString()}</td>
+      <td style="text-align:right;font-size:11px;color:var(--text2);" class="mono">${(hr.syutoku||0).toLocaleString()}</td>
+      <td style="font-size:11px;white-space:nowrap;">${hr.stable||''} <span style="color:var(--text3);">${hr.area||''}</span></td>
+      <td class="ketto">父${hr.sire||'—'}<br>母${hr.dam||'—'}</td>
+      <td>${hr.kettonum?`<a class="nblink" href="https://db.netkeiba.com/horse/${hr.kettonum}" target="_blank">▼</a>`:''}</td>
     </tr>`;
   });
-
   h += `</tbody></table></div>`;
   el.innerHTML = h;
 }
@@ -416,33 +531,33 @@ function doImport() {
   const htmlStr = document.getElementById('imp-html').value.trim();
   const seasonName = document.getElementById('imp-season').value.trim();
   const seasonYear = document.getElementById('imp-year').value.trim();
-  const seasonGen = document.getElementById('imp-gen').value.trim();
-  if (!htmlStr) { notify('HTMLを貼り付けてください', 'err'); return; }
+  const seasonGen  = document.getElementById('imp-gen').value.trim();
+  if (!htmlStr) { notify('HTMLを貼り付けてください','err'); return; }
   const doc = new DOMParser().parseFromString(htmlStr, 'text/html');
-  if (!doc.querySelector('.grouplist tbody')) { notify('グループ一覧ページのHTMLを貼り付けてください', 'err'); return; }
+  if (!doc.querySelector('.grouplist tbody')) { notify('グループ一覧ページのHTMLを貼り付けてください','err'); return; }
   const rows = doc.querySelectorAll('.grouplist tbody tr');
   const users = {};
   rows.forEach(row => {
     const a = row.querySelector('td.user a');
     const moneyEl = row.querySelector('td.money');
     if (!a || !moneyEl) return;
-    const m = (a.getAttribute('href') || '').match(/user_num=(\d+)/);
+    const m = (a.getAttribute('href')||'').match(/user_num=(\d+)/);
     const userNum = m ? m[1] : Date.now().toString();
-    users[userNum] = { name: a.textContent.trim(), money: parseInt(moneyEl.textContent.replace(/,/g, '')) || 0, horses: [] };
+    users[userNum] = { name: a.textContent.trim(), money: parseInt(moneyEl.textContent.replace(/,/g,''))||0, horses: [] };
   });
   const h3 = doc.querySelector('.grouplist h3');
-  const name = seasonName || (h3 ? h3.textContent.replace(/\(.*\)/, '').trim() : '新シーズン');
+  const name = seasonName || (h3 ? h3.textContent.replace(/\(.*\)/,'').trim() : '新シーズン');
   const data = { meta: { name, year: seasonYear, groupNum: '', generation: seasonGen }, users };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${name}.json`; a.click();
-  notify(`「${name}」のJSONを出力しました`, 'ok');
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${name}.json`; a.click();
+  notify(`「${name}」のJSONを出力しました`,'ok');
   closeImport();
 }
 
-function notify(msg, type = 'ok') {
+function notify(msg, type='ok') {
   const el = document.getElementById('notify');
   el.textContent = msg; el.className = `notify show ${type}`;
-  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 3500);
+  clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'), 3500);
 }
 
 document.querySelectorAll('.modal-ov').forEach(el => el.addEventListener('click', function(e) {
